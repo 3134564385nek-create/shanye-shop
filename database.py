@@ -45,10 +45,10 @@ def rows(db, sql, params=()):
     return [dict(row) for row in db.execute(sql, params)]
 
 
-def initialize(demo=True):
+def initialize(demo=True, initial_password='TrailKit2026!'):
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     with connect() as db:
-        db.execute('PRAGMA journal_mode=WAL')
+        db.execute('PRAGMA journal_mode=DELETE')
         db.executescript((ROOT / 'schema.sql').read_text(encoding='utf-8'))
         if db.execute('SELECT COUNT(*) FROM users').fetchone()[0]:
             return
@@ -56,7 +56,7 @@ def initialize(demo=True):
                                    ('sales', 'Sales', '广州'),
                                    ('admin', 'Admin', '广州')]:
             db.execute('INSERT INTO users(username,password,email,region,role) VALUES(?,?,?,?,?)',
-                       (name, password_hash('TrailKit2026!'), name + '@example.test', region, role))
+                       (name, password_hash(initial_password), name + '@example.test', region, role))
         db.executemany('INSERT INTO categories(name) VALUES(?)',
                        [(x,) for x in ['露营住宿', '徒步装备', '野外炊具', '照明工具']])
         products = [
